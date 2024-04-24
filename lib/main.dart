@@ -1,7 +1,16 @@
+import 'dart:convert';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html';
+import 'dart:typed_data';
+import 'dart:ui';
+
 import 'package:exposure_documentation/exposure_mode.dart';
 import 'package:exposure_documentation/exposure_questions.dart';
 import 'package:exposure_documentation/input_block.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_signature_pad/flutter_signature_pad.dart';
+
+import 'package:pdf/widgets.dart' as pw;
 
 void main() {
   runApp(const MyApp());
@@ -50,8 +59,10 @@ class _MyHomePageState extends State<MyHomePage> {
   int currentModeIndex = 0;
 
   final TextEditingController _controller = TextEditingController();
+  final GlobalKey<SignatureState> _sign = GlobalKey<SignatureState>();
+  Uint8List? imageBytes;
 
-  void next() {
+  void next() async {
     _controller.clear();
     switch (modeOrder[currentModeIndex]) {
       case ExposureMode.preparation:
@@ -61,6 +72,10 @@ class _MyHomePageState extends State<MyHomePage> {
           increaseCurrentModeIndex();
         }
       case ExposureMode.intensityDiagramm:
+        imageBytes = (await (await _sign.currentState?.getData())
+                ?.toByteData(format: ImageByteFormat.png))
+            ?.buffer
+            .asUint8List();
         increaseCurrentModeIndex();
       case ExposureMode.postProcessing:
         if (currentPostProcessingIndex + 1 < postProcessing.length) {
@@ -107,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('preparation'),
+        title: const Text('Exposure documentation'),
       ),
       body: Center(
           child: Column(
@@ -117,13 +132,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   setCurrentPreparationAnswer(answer: answer),
               question: preparationQuestions[currentPreparationIndex],
             ),
-          ExposureMode.intensityDiagramm => [buildNextButton()],
+          ExposureMode.intensityDiagramm => buildIntensityDiagrammScreen(),
           ExposureMode.postProcessing => buildInputBlock(
               onChanged: (answer) =>
                   setCurrentPreparationAnswer(answer: answer),
               question: postProcessingQuestions[currentPostProcessingIndex],
             ),
-          ExposureMode.save => [const Text('finished!')],
+          ExposureMode.save => buildEndScreen(),
         },
       )),
     );
@@ -143,6 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
           controller: _controller,
         ),
         const SizedBox(height: 12),
+        Expanded(child: Container()),
         buildNextButton(),
       ];
 
@@ -152,4 +168,82 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         child: const Text('Weiter'),
       );
+
+  List<Widget> buildIntensityDiagrammScreen() => [
+        Expanded(
+          child: Signature(
+            strokeWidth: 0.5,
+            color: Colors.black,
+            onSign: () {
+              final sign = _sign.currentState;
+              debugPrint('${sign?.points.length} points in the signature');
+            },
+            key: _sign,
+          ),
+        ),
+        buildNextButton(),
+      ];
+
+  List<Widget> buildEndScreen() => [
+        const Text(
+          'Du hast die Dokumentation abgeschlossen. Du kannst sie hier auf deinem Gerät speichern. Verlässt du die Seite, gehen die Daten unwideruflich verloren.',
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                _sign.currentState?.clear();
+              },
+              child: const Text('Löschen'),
+            ),
+            const SizedBox(width: 12),
+            ElevatedButton(
+              onPressed: () async {
+                var bytes = imageBytes;
+                final pdf = pw.Document();
+                pdf.addPage(
+                  pw.Page(
+                    build: (context) => pw.Column(
+                      children: [
+                        pw.Center(
+                          child: pw.Text('Vorbereitung'),
+                        ),
+                        ...preparation.expand(
+                          (input) => [
+                            pw.Text(input.question),
+                            pw.Text(input.answer),
+                          ],
+                        ),
+                        pw.Center(
+                          child: pw.Text('Nachbereitung'),
+                        ),
+                        bytes != null
+                            ? pw.Image(pw.MemoryImage(bytes))
+                            : pw.Container(),
+                        ...postProcessing.expand(
+                          (input) => [
+                            pw.Text(input.question),
+                            pw.Text(input.answer),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+
+                var savedFile = await pdf.save();
+                List<int> fileInts = List.from(savedFile);
+                AnchorElement(
+                    href:
+                        "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(fileInts)}")
+                  ..setAttribute("download",
+                      "${DateTime.now().millisecondsSinceEpoch}.pdf")
+                  ..click();
+              },
+              child: const Text('Speichern'),
+            ),
+          ],
+        ),
+      ];
 }

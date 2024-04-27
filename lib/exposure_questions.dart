@@ -12,10 +12,10 @@ const List<String> postProcessingQuestions = <String>[
   'Welche Gedanken hatte ich während der Übung?',
   'Welche Gefühle hatte ich während der Übung?',
   'Welche Körperreaktionen hatte ich während der Übung?',
-  'Sind meine Befürchtungen eingetreten?',
   '''
-  Wenn ja, wie bin ich damit umgegangen?
-  Wenn nein, wie erkläre ich mir das?
+Sind meine Befürchtungen eingetreten?
+Wenn ja, wie bin ich damit umgegangen?
+Wenn nein, wie erkläre ich mir das?
   ''',
   'Mit welchen Erwartungen gehe ich in die nächste Übung?'
 ];

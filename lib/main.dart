@@ -124,24 +124,28 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Exposure documentation'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            children: switch (modeOrder[currentModeIndex]) {
-              ExposureMode.preparation => buildInputBlock(
-                  onChanged: (answer) =>
-                      setCurrentPreparationAnswer(answer: answer),
-                  question: preparationQuestions[currentPreparationIndex],
-                ),
-              ExposureMode.intensityDiagramm => buildIntensityDiagrammScreen(),
-              ExposureMode.postProcessing => buildInputBlock(
-                  onChanged: (answer) =>
-                      setCurrentPreparationAnswer(answer: answer),
-                  question: postProcessingQuestions[currentPostProcessingIndex],
-                ),
-              ExposureMode.save => buildEndScreen(),
-            },
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: Column(
+              children: switch (modeOrder[currentModeIndex]) {
+                ExposureMode.preparation => buildInputBlock(
+                    onChanged: (answer) =>
+                        setCurrentPreparationAnswer(answer: answer),
+                    question: preparationQuestions[currentPreparationIndex],
+                  ),
+                ExposureMode.intensityDiagramm =>
+                  buildIntensityDiagrammScreen(),
+                ExposureMode.postProcessing => buildInputBlock(
+                    onChanged: (answer) =>
+                        setCurrentPreparationAnswer(answer: answer),
+                    question:
+                        postProcessingQuestions[currentPostProcessingIndex],
+                  ),
+                ExposureMode.save => buildEndScreen(),
+              },
+            ),
           ),
         ),
       ),

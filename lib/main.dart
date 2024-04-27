@@ -124,23 +124,27 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Exposure documentation'),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
           child: Column(
-        children: switch (modeOrder[currentModeIndex]) {
-          ExposureMode.preparation => buildInputBlock(
-              onChanged: (answer) =>
-                  setCurrentPreparationAnswer(answer: answer),
-              question: preparationQuestions[currentPreparationIndex],
-            ),
-          ExposureMode.intensityDiagramm => buildIntensityDiagrammScreen(),
-          ExposureMode.postProcessing => buildInputBlock(
-              onChanged: (answer) =>
-                  setCurrentPreparationAnswer(answer: answer),
-              question: postProcessingQuestions[currentPostProcessingIndex],
-            ),
-          ExposureMode.save => buildEndScreen(),
-        },
-      )),
+            children: switch (modeOrder[currentModeIndex]) {
+              ExposureMode.preparation => buildInputBlock(
+                  onChanged: (answer) =>
+                      setCurrentPreparationAnswer(answer: answer),
+                  question: preparationQuestions[currentPreparationIndex],
+                ),
+              ExposureMode.intensityDiagramm => buildIntensityDiagrammScreen(),
+              ExposureMode.postProcessing => buildInputBlock(
+                  onChanged: (answer) =>
+                      setCurrentPreparationAnswer(answer: answer),
+                  question: postProcessingQuestions[currentPostProcessingIndex],
+                ),
+              ExposureMode.save => buildEndScreen(),
+            },
+          ),
+        ),
+      ),
     );
   }
 

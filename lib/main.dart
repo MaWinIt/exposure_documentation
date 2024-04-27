@@ -214,44 +214,50 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Text('Weiter'),
       );
 
-  Widget buildIntensityDiagrammScreen() => Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'Trage in diesem Diagramm ein, wie der Angstverlauf über die Zeit hinweg war',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox.square(
-            dimension: min(MediaQuery.of(context).size.width,
-                    MediaQuery.of(context).size.height) *
-                0.8,
-            child: Signature(
-              strokeWidth: 1,
-              color: Colors.black,
-              onSign: () {
-                final sign = _sign.currentState;
-                debugPrint('${sign?.points.length} points in the signature');
-              },
-              key: _sign,
-              backgroundPainter: DiagrammPainter(),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  _sign.currentState?.clear();
-                },
-                child: const Text('Löschen'),
+  Widget buildIntensityDiagrammScreen() => SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Trage in diesem Diagramm ein, wie der Angstverlauf über die Zeit hinweg war',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
               ),
-              buildNextButton(),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox.square(
+                  dimension: min(MediaQuery.of(context).size.width,
+                          MediaQuery.of(context).size.height) *
+                      0.8,
+                  child: Signature(
+                    strokeWidth: 1,
+                    color: Colors.black,
+                    key: _sign,
+                    backgroundPainter: DiagrammPainter(),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    _sign.currentState?.clear();
+                  },
+                  child: const Text('Löschen'),
+                ),
+                buildNextButton(),
+              ],
+            ),
+          ],
+        ),
       );
 
   Widget buildEndScreen() {
@@ -387,7 +393,15 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             ...bytes != null
                 ? [
-                    Image.memory(bytes),
+                    Center(
+                      child: Container(
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Image.memory(bytes),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 16),
                   ]
                 : [],
